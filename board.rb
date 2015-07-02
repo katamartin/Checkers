@@ -1,6 +1,7 @@
 require_relative 'piece'
 require_relative 'arrays'
 require 'io/console'
+require 'byebug'
 
 class Board
   include ArrayArithmetic
@@ -42,6 +43,17 @@ class Board
 
   def add_piece(piece, pos)
     self[pos] = piece
+  end
+
+  def deep_dup
+    duped = Board.new(false)
+    grid.each_with_index do |row, i|
+      row.each_with_index do |el, j|
+        duped[[i, j]] = el.dup(duped) unless el.nil?
+      end
+    end
+
+    duped
   end
 
   def render
@@ -119,13 +131,23 @@ class Board
     render
   end
 
+  def try_moves
+    piece = self[selected_positions.first]
+    piece.perform_moves(selected_positions.drop(1))
+    self.selected_positions = []
+  end
+
   def use_cursor
     c = read_char
 
     case c
-
     when "\r"
-      select_position(cursor)
+      if cursor == selected_positions.last
+        try_moves
+      else
+        selected_positions << cursor
+      end
+      #select_position(cursor)
     when "\u0003"
       raise Interrupt
     when "\e[A"
@@ -152,6 +174,7 @@ class Board
 end
 
 b = Board.new
+
 while true
   b.render
   b.use_cursor

@@ -1,5 +1,6 @@
 require 'colorize'
 require_relative 'arrays'
+require_relative 'errors'
 
 class Piece
   def initialize(board, pos, color)
@@ -51,6 +52,39 @@ class Piece
     true
   end
 
+  def perform_moves!(move_sequence)
+    count = move_sequence.length
+    if count == 1
+      unless perform_slide(move_sequence.last) || perform_jump(move_sequence.last)
+        raise InvalidMoveError
+      end
+    else
+      move_sequence.each do |move|
+        raise InvalidMoveError unless perform_jump(move)
+      end
+    end
+  end
+
+  def valid_move_seq?(move_sequence)
+    duped_board = board.deep_dup
+    duped_piece = duped_board[pos]
+    begin
+      duped_piece.perform_moves!(move_sequence)
+    rescue InvalidMoveError
+      return false
+    end
+
+    true
+  end
+
+  def perform_moves(move_sequence)
+    if valid_move_seq?(move_sequence)
+      perform_moves!(move_sequence)
+    else
+      raise InvalidMoveError
+    end
+  end
+
   def maybe_promote
     bottom = headings.include?(1) && pos.first == 7
     top = headings.include?(-1) && pos.first == 0
@@ -96,6 +130,13 @@ class Piece
     possible_jumps = jump_diffs.map { |delta| add_arrs(delta, pos) }
 
     possible_jumps.select { |jump| board.valid_pos?(jump) }
+  end
+
+  def dup(duped_board)
+    duped = Piece.new(duped_board, pos.dup, color)
+    duped.kinged, headings = true, [1, -1] if king?
+
+    duped
   end
 
   protected
