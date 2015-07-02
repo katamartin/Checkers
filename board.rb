@@ -1,3 +1,6 @@
+require_relative 'piece'
+
+
 class Board
   attr_reader :grid
   def initialize(populate = true)
@@ -21,7 +24,7 @@ class Board
       row.each_with_index do |el, j|
         if i < 2 && (i + j).even?
           Piece.new(self, [i, j], :red)
-        elsif i > 6 && (i + j).even?
+        elsif i > 5 && (i + j).even?
           Piece.new(self, [i, j], :black)
         end
       end
@@ -37,6 +40,25 @@ class Board
 
   def add_piece(piece, pos)
     self[pos] = piece
+  end
+
+  def render
+    system("clear")
+    grid.each_with_index do |row, i|
+      print "#{i} "
+      row.each_with_index do |el, j|
+        if el == nil
+          string = "   "
+        else
+          string = " #{el} "
+        end
+        string = string.colorize(:background => :black) if (i + j).odd?
+        print string
+      end
+      puts ""
+    end
+
+    nil
   end
 
 end

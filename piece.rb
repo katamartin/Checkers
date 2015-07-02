@@ -1,3 +1,5 @@
+require 'colorize'
+
 class Piece
   attr_reader :board, :pos, :color
   def initialize(board, pos, color)
@@ -8,6 +10,14 @@ class Piece
     @pos = pos
     @color = color
     board.add_piece(self, pos)
+  end
+
+  def inspect
+    "●".colorize(color)
+  end
+
+  def to_s
+    inspect
   end
 
 end
