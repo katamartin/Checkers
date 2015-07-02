@@ -54,7 +54,9 @@ class Piece
 
   def perform_moves!(move_sequence)
     count = move_sequence.length
-    if count == 1
+    if count == 0
+      raise InvalidMoveError
+    elsif count == 1
       unless perform_slide(move_sequence.last) || perform_jump(move_sequence.last)
         raise InvalidMoveError
       end
@@ -134,16 +136,16 @@ class Piece
 
   def dup(duped_board)
     duped = Piece.new(duped_board, pos.dup, color)
-    duped.kinged, headings = true, [1, -1] if king?
+    duped.kinged, duped.headings = true, [1, -1] if king?
 
     duped
   end
 
-  protected
-  attr_reader :board, :color, :headings
+  #protected
+  attr_reader :board, :color
 
-  private
+  #private
   include ArrayArithmetic
-  attr_accessor :pos, :kinged
+  attr_accessor :pos, :kinged, :headings
 
 end

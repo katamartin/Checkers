@@ -118,47 +118,47 @@ class Board
     self.cursor = moved_cursor if on_board?(moved_cursor)
   end
 
-  def select_position(pos)
-    selected_positions << pos
-    if selected_positions.length == 2
-      piece = self[selected_positions.first]
-      piece.perform_slide(selected_positions.last) unless piece.nil?
-      piece.perform_jump(selected_positions.last) unless piece.nil?
-      self.selected_positions = []
-    elsif selected_positions.length > 2
-      self.selected_positions = [pos]
-    end
-    render
-  end
+  def pick_position(color)
+    chosen = false
+    until chosen
+      render
+      c = read_char
 
-  def try_moves
-    piece = self[selected_positions.first]
-    piece.perform_moves(selected_positions.drop(1))
-    self.selected_positions = []
-  end
-
-  def use_cursor
-    c = read_char
-
-    case c
-    when "\r"
-      if cursor == selected_positions.last
-        try_moves
-      else
-        selected_positions << cursor
+      case c
+      when "\r"
+        chosen = true
+        #return cursor
+      when "\u0003"
+        raise Interrupt
+      when "\e[A"
+        move_cursor([-1, 0])
+      when "\e[B"
+        move_cursor([1, 0])
+      when "\e[C"
+        move_cursor([0, 1])
+      when "\e[D"
+        move_cursor([0, -1])
       end
-      #select_position(cursor)
-    when "\u0003"
-      raise Interrupt
-    when "\e[A"
-      move_cursor([-1, 0])
-    when "\e[B"
-      move_cursor([1, 0])
-    when "\e[C"
-      move_cursor([0, 1])
-    when "\e[D"
-      move_cursor([0, -1])
     end
+
+    cursor
+  end
+
+  def get_move_sequence(color)
+    complete = false
+    until complete
+      render
+      next_position = pick_position(color)
+      if next_position == selected_positions.last
+        complete = true
+      else
+        selected_positions << next_position
+      end
+    end
+    sequence = selected_positions
+    self.selected_positions = []
+
+    sequence
   end
 
   def add_arrs(arr1, arr2)
@@ -167,15 +167,9 @@ class Board
     [arr1[0] + arr2[0], arr1[1] + arr2[1]]
   end
 
-  private
+
+  #private
   attr_reader :grid
   attr_accessor :cursor, :selected_positions
 
-end
-
-b = Board.new
-
-while true
-  b.render
-  b.use_cursor
 end
