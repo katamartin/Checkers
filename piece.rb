@@ -1,8 +1,7 @@
 require 'colorize'
+require_relative 'arrays'
 
 class Piece
-  attr_accessor :pos
-  attr_reader :board, :color, :kinged, :heading
   def initialize(board, pos, color)
     raise "Invalid position" unless board.valid_pos?(pos)
     raise "Invalid color" unless [:red, :black].include?(color)
@@ -10,21 +9,21 @@ class Piece
     @board = board
     @pos = pos
     @color = color
-    @heading = color == :red ? 1 : -1
+    @headings = color == :red ? [1] : [-1]
     @kinged = false
     board.add_piece(self, pos)
   end
 
-  def inspect
-    "●".colorize(color)
+  def to_s
+    if kinged
+      "♛".colorize(color)
+    else
+      "●".colorize(color)
+    end
   end
 
   def king?
     kinged
-  end
-
-  def to_s
-    inspect
   end
 
   def delete
@@ -53,8 +52,11 @@ class Piece
   end
 
   def maybe_promote
-    if (heading == 1 && pos.first == 7) || (heading == -1 && pos.first == 0)
+    bottom = headings.include?(1) && pos.first == 7
+    top = headings.include?(-1) && pos.first == 0
+    if (bottom || top) && !kinged
       self.kinged = true
+      headings << headings.first * -1
     end
   end
 
@@ -65,11 +67,23 @@ class Piece
   end
 
   def slide_diffs
-    [[heading, -1], [heading, 1]]
+    diffs = []
+    headings.each do |dir|
+      diffs << [dir, -1]
+      diffs << [dir, 1]
+    end
+
+    diffs
   end
 
   def jump_diffs
-    [[2 * heading, -2], [2 * heading, 2]]
+    diffs = []
+    headings.each do |dir|
+      diffs << [2 * dir, -2]
+      diffs << [2 * dir, 2]
+    end
+
+    diffs
   end
 
   def slides
@@ -84,16 +98,11 @@ class Piece
     possible_jumps.select { |jump| board.valid_pos?(jump) }
   end
 
-  def add_arrs(arr1, arr2)
-    raise "Can only add 2D vecs!" unless arr1.length == 2 and arr2.length == 2
+  protected
+  attr_reader :board, :color, :headings
 
-    [arr1[0] + arr2[0], arr1[1] + arr2[1]]
-  end
-
-  def subtract_arrs(arr1, arr2)
-    raise "Can only subtract 2D vecs!" unless arr1.length == 2 and arr2.length == 2
-
-    [arr1[0] - arr2[0], arr1[1] - arr2[1]]
-  end
+  private
+  include ArrayArithmetic
+  attr_accessor :pos, :kinged
 
 end

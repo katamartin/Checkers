@@ -1,9 +1,9 @@
 require_relative 'piece'
+require_relative 'arrays'
 require 'io/console'
 
 class Board
-  attr_reader :grid
-  attr_accessor :cursor, :selected_positions
+  include ArrayArithmetic
   def initialize(populate = true)
     @grid = Array.new(8) { Array.new(8) }
     @cursor = [0, 0]
@@ -144,6 +144,10 @@ class Board
 
     [arr1[0] + arr2[0], arr1[1] + arr2[1]]
   end
+
+  private
+  attr_reader :grid
+  attr_accessor :cursor, :selected_positions
 
 end
 
