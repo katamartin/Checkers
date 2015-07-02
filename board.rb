@@ -36,7 +36,6 @@ class Board
 
   def on_board?(pos)
     return false unless pos.all? { |idx| idx.between?(0, 7) }
-    # return false unless (pos[0] + pos[1]).even?
 
     true
   end
@@ -112,12 +111,12 @@ class Board
     if selected_positions.length == 2
       piece = self[selected_positions.first]
       piece.perform_slide(selected_positions.last) unless piece.nil?
+      piece.perform_jump(selected_positions.last) unless piece.nil?
       self.selected_positions = []
-      render
     elsif selected_positions.length > 2
       self.selected_positions = [pos]
-      render
     end
+    render
   end
 
   def use_cursor
