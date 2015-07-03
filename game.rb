@@ -18,6 +18,9 @@ class Game
     puts "#{player.capitalize} wins!"
   end
 
+  private
+  attr_reader :players, :board
+
   def play_turn(color)
       message = "It's #{color.capitalize}'s turn!"
     begin
@@ -49,10 +52,6 @@ class Game
   def switch_players
     players.rotate!
   end
-
-  private
-  attr_reader :players, :board
-
 end
 
 if __FILE__ == $PROGRAM_NAME

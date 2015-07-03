@@ -25,10 +25,57 @@ class Piece
     end
   end
 
+  def dup(duped_board)
+    duped = Piece.new(duped_board, pos.dup, color, kinged)
+    duped.headings = [1, -1] if kinged
+
+    duped
+  end
+
+  def perform_moves(move_sequence)
+    if valid_move_seq?(move_sequence)
+      perform_moves!(move_sequence)
+    else
+      raise InvalidMoveError.new(Piece), "Invalid move!"
+    end
+  end
+
+  def valid_move_seq?(move_sequence)
+    duped_board = board.deep_dup
+    duped_piece = duped_board[pos]
+    begin
+      duped_piece.perform_moves!(move_sequence)
+    rescue InvalidMoveError
+      return false
+    end
+
+    true
+  end
+  
   def delete
     board[pos] = nil
     self.pos = nil
   end
+
+  def perform_moves!(move_sequence)
+    count = move_sequence.length
+    if count == 0
+      raise InvalidMoveError
+    elsif count == 1
+      unless perform_slide(move_sequence.last) || perform_jump(move_sequence.last)
+        raise InvalidMoveError
+      end
+    else
+      move_sequence.each do |move|
+        raise InvalidMoveError unless perform_jump(move)
+      end
+    end
+  end
+
+  protected
+  attr_reader :board
+
+  private
 
   def perform_slide(end_pos)
     return false unless slides.include?(end_pos) && board.empty?(end_pos)
@@ -47,41 +94,6 @@ class Piece
 
     maybe_promote
     true
-  end
-
-  def perform_moves!(move_sequence)
-    count = move_sequence.length
-    if count == 0
-      raise InvalidMoveError
-    elsif count == 1
-      unless perform_slide(move_sequence.last) || perform_jump(move_sequence.last)
-        raise InvalidMoveError
-      end
-    else
-      move_sequence.each do |move|
-        raise InvalidMoveError unless perform_jump(move)
-      end
-    end
-  end
-
-  def valid_move_seq?(move_sequence)
-    duped_board = board.deep_dup
-    duped_piece = duped_board[pos]
-    begin
-      duped_piece.perform_moves!(move_sequence)
-    rescue InvalidMoveError
-      return false
-    end
-
-    true
-  end
-
-  def perform_moves(move_sequence)
-    if valid_move_seq?(move_sequence)
-      perform_moves!(move_sequence)
-    else
-      raise InvalidMoveError.new(Piece), "Invalid move!"
-    end
   end
 
   def maybe_promote
@@ -131,17 +143,6 @@ class Piece
     possible_jumps.select { |jump| board.valid_pos?(jump) }
   end
 
-  def dup(duped_board)
-    duped = Piece.new(duped_board, pos.dup, color, kinged)
-    duped.headings = [1, -1] if kinged
-
-    duped
-  end
-
-  protected
-  attr_reader :board
-
-  private
   include ArrayArithmetic
   attr_accessor :pos
 

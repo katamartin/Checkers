@@ -21,18 +21,6 @@ class Board
     grid[x][y] = value
   end
 
-  def fill_grid(populate)
-    return unless populate
-    grid.each_with_index do |row, i|
-      row.each_with_index do |el, j|
-        if i < 2 && (i + j).even?
-          Piece.new(self, [i, j], :red)
-        elsif i > 5 && (i + j).even?
-          Piece.new(self, [i, j], :black)
-        end
-      end
-    end
-  end
 
   def on_board?(pos)
     return false unless pos.all? { |idx| idx.between?(0, 7) }
@@ -44,16 +32,6 @@ class Board
     self[pos] = piece
   end
 
-  def deep_dup
-    duped = Board.new(false)
-    grid.each_with_index do |row, i|
-      row.each_with_index do |el, j|
-        duped[[i, j]] = el.dup(duped) unless el.nil?
-      end
-    end
-
-    duped
-  end
 
   def render(message = "")
     system("clear")
@@ -74,6 +52,68 @@ class Board
     nil
   end
 
+
+  def valid_pos?(pos)
+    on_board?(pos) && (pos[0] + pos[1]).even?
+  end
+
+  def empty?(pos)
+    raise "Not a valid piece position" unless valid_pos?(pos)
+
+    self[pos].nil?
+  end
+
+
+  def get_move_sequence(color, message = "")
+    complete = false
+    until complete
+      render
+      next_position = pick_position(color, message)
+      if next_position == selected_positions.last
+        complete = true
+      else
+        selected_positions << next_position
+      end
+    end
+    sequence = selected_positions
+    self.selected_positions = []
+
+    sequence
+  end
+
+  def deep_dup
+    duped = Board.new(false)
+    grid.each_with_index do |row, i|
+      row.each_with_index do |el, j|
+        duped[[i, j]] = el.dup(duped) unless el.nil?
+      end
+    end
+
+    duped
+  end
+
+  def pieces
+    grid.flatten.select { |piece| !piece.nil? }
+  end
+
+
+
+  private
+
+  def fill_grid(populate)
+    return unless populate
+    grid.each_with_index do |row, i|
+      row.each_with_index do |el, j|
+        if i < 2 && (i + j).even?
+          Piece.new(self, [i, j], :red)
+        elsif i > 5 && (i + j).even?
+          Piece.new(self, [i, j], :black)
+        end
+      end
+    end
+  end
+
+
   def background_color(pos)
     if pos == cursor
       return :yellow
@@ -84,16 +124,6 @@ class Board
     else
       :light_white
     end
-  end
-
-  def valid_pos?(pos)
-    on_board?(pos) && (pos[0] + pos[1]).even?
-  end
-
-  def empty?(pos)
-    raise "Not a valid piece position" unless valid_pos?(pos)
-
-    self[pos].nil?
   end
 
   def read_char
@@ -142,31 +172,7 @@ class Board
 
     cursor
   end
-
-  def get_move_sequence(color, message = "")
-    complete = false
-    until complete
-      render
-      next_position = pick_position(color, message)
-      if next_position == selected_positions.last
-        complete = true
-      else
-        selected_positions << next_position
-      end
-    end
-    sequence = selected_positions
-    self.selected_positions = []
-
-    sequence
-  end
-
-  def pieces
-    grid.flatten.select { |piece| !piece.nil? }
-  end
-
-
-
-  private
+  
   include ArrayArithmetic
   attr_reader :grid
   attr_accessor :cursor, :selected_positions
