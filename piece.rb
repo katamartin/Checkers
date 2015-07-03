@@ -25,10 +25,6 @@ class Piece
     end
   end
 
-  def king?
-    kinged
-  end
-
   def delete
     board[pos] = nil
     self.pos = nil
@@ -137,7 +133,7 @@ class Piece
 
   def dup(duped_board)
     duped = Piece.new(duped_board, pos.dup, color, kinged)
-    duped.headings = [1, -1] if king?
+    duped.headings = [1, -1] if kinged
 
     duped
   end
