@@ -3,7 +3,9 @@ require_relative 'arrays'
 require_relative 'errors'
 
 class Piece
-  def initialize(board, pos, color)
+  attr_reader :color
+  attr_accessor :kinged, :headings
+  def initialize(board, pos, color, kinged = false)
     raise "Invalid position" unless board.valid_pos?(pos)
     raise "Invalid color" unless [:red, :black].include?(color)
 
@@ -11,7 +13,7 @@ class Piece
     @pos = pos
     @color = color
     @headings = color == :red ? [1] : [-1]
-    @kinged = false
+    @kinged = kinged
     board.add_piece(self, pos)
   end
 
@@ -42,8 +44,7 @@ class Piece
 
   def perform_jump(end_pos)
     return false unless jumps.include?(end_pos) && board.empty?(end_pos)
-    jump_dir = jumps.index(end_pos)
-    jumped_piece = board[slides[jump_dir]]
+    jumped_piece = board[midpoint(end_pos, pos)]
     return false if jumped_piece.nil? || jumped_piece.color == color
     update_pos(end_pos)
     jumped_piece.delete
@@ -90,7 +91,7 @@ class Piece
   def maybe_promote
     bottom = headings.include?(1) && pos.first == 7
     top = headings.include?(-1) && pos.first == 0
-    if (bottom || top) && !kinged
+    if !kinged && (bottom || top)
       self.kinged = true
       headings << headings.first * -1
     end
@@ -135,17 +136,18 @@ class Piece
   end
 
   def dup(duped_board)
-    duped = Piece.new(duped_board, pos.dup, color)
-    duped.kinged, duped.headings = true, [1, -1] if king?
+    duped = Piece.new(duped_board, pos.dup, color, kinged)
+    duped.headings = [1, -1] if king?
 
     duped
   end
 
-  #protected
-  attr_reader :board, :color
+  protected
+  attr_reader :board
+  #attr_accessor :kinged, :headings
 
-  #private
+  private
   include ArrayArithmetic
-  attr_accessor :pos, :kinged, :headings
+  attr_accessor :pos
 
 end

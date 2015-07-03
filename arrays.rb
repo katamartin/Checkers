@@ -10,4 +10,10 @@ module ArrayArithmetic
 
     [arr1[0] - arr2[0], arr1[1] - arr2[1]]
   end
+
+  def midpoint(arr1, arr2)
+    difference = subtract_arrs(arr1, arr2)
+    half_step = [difference[0] / 2, difference[1] / 2]
+    add_arrs(arr2, half_step)
+  end
 end

@@ -14,12 +14,13 @@ class Game
       player = players.first
       play_turn(player)
     end
+    board.render
     puts "#{player.to_s.capitalize} wins!"
   end
 
   def play_turn(color)
     board.render
-    puts "It's #{color.to_s.capitalize}'s turn!'"
+    puts "It's #{color.to_s.capitalize}'s turn!"
     begin
       sequence = board.get_move_sequence(color)
       try_sequence(color, sequence)
@@ -40,9 +41,9 @@ class Game
 
 
   def won?
-    pieces = board.grid.flatten.select { |piece| !piece.nil? }
+    pieces = board.pieces
 
-    pieces.all? { |piece| piece.color == :red } || pieces.all? { |piece| piece.color == :black }
+    pieces.all? { |p| p.color == :red } || pieces.all? { |p| p.color == :black }
   end
 
   def switch_players

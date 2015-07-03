@@ -4,7 +4,6 @@ require 'io/console'
 require 'byebug'
 
 class Board
-  include ArrayArithmetic
   def initialize(populate = true)
     @grid = Array.new(8) { Array.new(8) }
     @cursor = [0, 0]
@@ -127,7 +126,6 @@ class Board
       case c
       when "\r"
         chosen = true
-        #return cursor
       when "\u0003"
         raise Interrupt
       when "\e[A"
@@ -161,14 +159,14 @@ class Board
     sequence
   end
 
-  def add_arrs(arr1, arr2)
-    raise "Can only add 2D vecs!" unless arr1.length == 2 and arr2.length == 2
-
-    [arr1[0] + arr2[0], arr1[1] + arr2[1]]
+  def pieces
+    grid.flatten.select { |piece| !piece.nil? }
   end
 
 
-  #private
+
+  private
+  include ArrayArithmetic
   attr_reader :grid
   attr_accessor :cursor, :selected_positions
 
