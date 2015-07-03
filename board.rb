@@ -55,7 +55,7 @@ class Board
     duped
   end
 
-  def render
+  def render(message = "")
     system("clear")
     grid.each_with_index do |row, i|
       print "#{i} "
@@ -69,6 +69,7 @@ class Board
       end
       puts ""
     end
+    puts message
 
     nil
   end
@@ -117,10 +118,10 @@ class Board
     self.cursor = moved_cursor if on_board?(moved_cursor)
   end
 
-  def pick_position(color)
+  def pick_position(color, message = "")
     chosen = false
     until chosen
-      render
+      render(message)
       c = read_char
 
       case c
@@ -142,11 +143,11 @@ class Board
     cursor
   end
 
-  def get_move_sequence(color)
+  def get_move_sequence(color, message = "")
     complete = false
     until complete
       render
-      next_position = pick_position(color)
+      next_position = pick_position(color, message)
       if next_position == selected_positions.last
         complete = true
       else

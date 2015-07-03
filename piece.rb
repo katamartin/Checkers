@@ -84,7 +84,7 @@ class Piece
     if valid_move_seq?(move_sequence)
       perform_moves!(move_sequence)
     else
-      raise InvalidMoveError
+      raise InvalidMoveError.new(Piece), "Invalid move!"
     end
   end
 
@@ -144,7 +144,6 @@ class Piece
 
   protected
   attr_reader :board
-  #attr_accessor :kinged, :headings
 
   private
   include ArrayArithmetic

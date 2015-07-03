@@ -15,18 +15,18 @@ class Game
       play_turn(player)
     end
     board.render
-    puts "#{player.to_s.capitalize} wins!"
+    puts "#{player.capitalize} wins!"
   end
 
   def play_turn(color)
-    board.render
-    puts "It's #{color.to_s.capitalize}'s turn!"
+      message = "It's #{color.capitalize}'s turn!"
     begin
-      sequence = board.get_move_sequence(color)
+      board.render("It's #{color.to_s.capitalize}'s turn!")
+      sequence = board.get_move_sequence(color, message)
       try_sequence(color, sequence)
       move_made = true
-    rescue InvalidMoveError
-      puts "Invlid move!!"
+    rescue InvalidMoveError => e
+      message = e.message
       retry
     end
   end
@@ -34,7 +34,7 @@ class Game
   def try_sequence(color, sequence)
     piece = board[sequence.first]
     if piece.nil? || color != piece.color
-      raise InvalidMoveError
+      raise InvalidMoveError.new(Piece), "Move a #{color} piece!"
     end
     piece.perform_moves(sequence.drop(1))
   end
